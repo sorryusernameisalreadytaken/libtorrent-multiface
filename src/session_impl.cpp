@@ -49,6 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "libtorrent/config.hpp"
 
+#include <asm-generic/socket.h>
 #include <ctime>
 #include <algorithm>
 #include <cctype>
@@ -1638,6 +1639,9 @@ namespace {
 		if (ret->flags & listen_socket_t::accept_incoming)
 		{
 			ret->sock = std::make_shared<tcp::acceptor>(m_io_context);
+			if (!lep.device.empty()) {
+				setsockopt(ret->sock->native_handle(), SOL_SOCKET, SO_BINDTODEVICE, lep.device.c_str(), lep.device.length());
+			}
 			ret->sock->open(bind_ep.protocol(), ec);
 			last_op = operation_t::sock_open;
 			if (ec)
